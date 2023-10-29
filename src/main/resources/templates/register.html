@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <ul class="nav nav-pills">
+            <li role="presentation"><a th:href = "@{/login}">Login</a></li>
+            <li role="presentation"><a th:href = "@{/register}" >Register</a></li>
+        </ul>
+    </div>
+</nav>
+<br>
+<br>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div th:if="${param.success}">
+                <div class="alert alert-info">
+                    You have successfully registered.
+                </div>
+            </div>
+            <h1>Registration</h1>
+            <form th:action="@{/register}" th:method="post" th:object="${user}">
+                <div th:if="${param.error}">
+                    <div class="alert alert-danger">
+                        Username should be at least 2 characters long and password should contain at least 1 capital letter,
+                        1 small letter, 1 special symbol, 1 number and should be at  least 8 characters long.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for = "username">
+                        Username
+                    </label>
+                    <input id="username" type="text" class="form-control" th:field="*{username}"
+                           required autofocus="autofocus" minlength="2">
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for= "password">
+                        Password
+                    </label>
+                    <input id="password" class="form-control" type="password" th:field="*{password}"
+                           required autofocus="autofocus"
+                           pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,256}$" minlength="8">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Register</button>
+                    <span>Already Registered? <a th:href="@{/login}">Login here</a> </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>l>

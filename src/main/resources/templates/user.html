@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-default fixed-top navbar">
+
+        <form class="navbar-form navbar-left" th:action="@{/home}" method="get" >
+            <div class="form-group">
+                <input type="text" class="form-control" name="search" placeholder="Search Lessons">
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+        </form>
+
+        <ul class="nav navbar-nav navbar-left">
+            <li ><a th:href="@{/home}">Home</a></li>
+            <li role="presentation" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/users}">Find Users</a></li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{'/users/'+${#authentication.name}}">
+                My Profile</a> </li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a> </li>
+        </ul>
+    </nav>
+</header>
+    <div class="container">
+
+        <div th:if="${param.success}">
+            <div class="alert alert-info">
+                User updated successfully.
+            </div>
+        </div>
+
+        <div class="row" >
+            <div class="col-md-6 col-md-offset-3">
+        <h1><span th:text="${user.username}">Username</span></h1>
+        <div class="media" th:if="${user.profilePictureId}">
+            <div class="media-left media-middle">
+
+                    <div class="col-md-4" style="padding-left: 0px;  padding-right: 0px;">
+
+
+                    <img  width="200" height="200"
+                          class="media-object" th:src="@{/users/{username}/profile-picture (username = ${user.username})}" alt="...">
+                    </div>
+            </div>
+            <br>
+        </div>
+        <div class="media" th:unless="${user.profilePictureId}">
+            <div class="media-left media-middle">
+
+                    <img class="media-object" th:src="@{/img/default-profile-picture.png}">
+
+            </div>
+        </div>
+                <div th:if="${param.error}">
+                    <div class="alert alert-danger">
+                        Username should be at least 2 characters long and password should contain at least 1 capital letter,
+                        1 small letter, 1 special symbol, 1 number and should be at  least 8 characters long.
+                    </div>
+                </div>
+
+        <button id="btnStart" type="button" class="btn btn-primary btn-success" data-toggle="modal" data-target="#formModal"
+                th:if="${user.username == username} or ${#authorization.expression('hasRole(''ADMIN'')')}">
+            Update</button>
+
+        <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="formModalLabel">Awesome Form</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="#" th:action="@{/users/{username}/updated (username = ${user.username})}"
+                          th:object="${userRequest}" th:method="PUT">
+                        <div class="modal-body">
+                            <div class="form-group row">
+                                <label for="username" class="col-sm-6 col-form-label">
+                                    Username:
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="username" placeholder="New username" th:field="*{username}">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="password" class="col-sm-6 col-form-label">
+                                    Password:
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="password" class="form-control" id="password" placeholder="New password" th:field="*{password}">
+                                </div>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="check" required>
+                                <label class="form-check-label" for="check">
+                                    Are you sure?
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+                <form th:if="${not user.roles.contains('ROLE_ADMIN')} and ${#authorization.expression('hasRole(''ADMIN'')')}" action="#"
+                      th:action="@{/users/{username}/make-admin (username = ${user.username})}"
+                      th:object="${userRequest}" th:method="PUT">
+                <button
+                   th:href="@{/users/{username}/make-admin(username = ${user.username})}" class="btn btn-success">
+                    Make Admin
+                </button>
+                </form>
+
+                <form th:if="${user.roles.contains('ROLE_ADMIN')} and ${#authorization.expression('hasRole(''ADMIN'')')}" action="#"
+                      th:action="@{/users/{username}/remove-admin (username = ${user.username})}"
+                      th:object="${userRequest}" th:method="PUT">
+                    <button
+                            th:href="@{/users/{username}/remove-admin(username = ${user.username})}" class="btn btn-danger">
+                        Remove Admin
+                    </button>
+                </form>
+
+                <form th:if="${not user.roles.contains('ROLE_MODERATOR')} and ${#authorization.expression('hasRole(''ADMIN'')')}" action="#"
+                      th:action="@{/users/{username}/make-moderator (username = ${user.username})}"
+                      th:object="${userRequest}" th:method="PUT">
+                    <button
+                            th:href="@{/users/{username}/make-moderator(username = ${user.username})}" class="btn btn-success">
+                        Make Moderator
+                    </button>
+                </form>
+
+                <form th:if="${user.roles.contains('ROLE_MODERATOR')} and ${#authorization.expression('hasRole(''ADMIN'')')}" action="#"
+                      th:action="@{/users/{username}/remove-moderator (username = ${user.username})}"
+                      th:object="${userRequest}" th:method="PUT">
+                    <button
+                            th:href="@{/users/{username}/remove-moderator(username = ${user.username})}" class="btn btn-danger">
+                        Remove Moderator
+                    </button>
+                </form>
+
+            <a th:if="${user.username == username} or ${#authorization.expression('hasRole(''ADMIN'')')}"
+               th:href="@{/users/{username}/delete(username = ${user.username})}" class="btn btn-danger">
+                Delete
+            </a>
+
+                <div class="page-header" th:if="${user.username == username}">
+                    <h1>Upload profile picture </h1>
+                </div>
+
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4 text-center">
+                        <form enctype="multipart/form-data" th:if="${user.username == username}"
+                              action="#" th:action="@{'/users/{username}/profile-picture/upload' (username = ${user.username})}"
+                              th:method="post">
+                            <input type="file" id="file" name="file" multiple="multiple" />
+                            <br>
+                            <p> <input type="submit" value="Upload Profile Picture" class="btn btn-lg btn-primary" /> </p>
+                        </form>
+                        <a th:if="${user.profilePictureId} and ${user.username == username
+                        or #authorization.expression('hasRole(''ADMIN'')')}"
+                           th:href="@{/users/{username}/remove-profile-picture(username = ${user.username})}"
+                           class="btn btn-danger btn-lg btn-primary">Remove Profile Picture</a>
+                    </div>
+                    <div class="col-md-4"></div>
+                <br>
+                <div class="row">
+
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <br>
+
+
+<!--        <div class="row">-->
+<!--            <div class="row">-->
+<!--                <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">-->
+<!--                    <div class="carousel-inner">-->
+<!--                        <div class="carousel-item active">-->
+<!--                            <img src="..." class="d-block w-100" alt="...">-->
+<!--                        </div>-->
+<!--                        <div class="carousel-item">-->
+<!--                            <img src="..." class="d-block w-100" alt="...">-->
+<!--                        </div>-->
+<!--                        <div class="carousel-item">-->
+<!--                            <img src="..." class="d-block w-100" alt="...">-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">-->
+<!--                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>-->
+<!--                        <span class="visually-hidden">Previous</span>-->
+<!--                    </button>-->
+<!--                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">-->
+<!--                        <span class="carousel-control-next-icon" aria-hidden="true"></span>-->
+<!--                        <span class="visually-hidden">Next</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+    </div>
+</body>
+</html>

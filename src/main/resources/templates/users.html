@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-default fixed-top navbar">
+
+
+
+        <form class="navbar-form navbar-left">
+            <div class="form-group">
+                <input type="text" class="form-control" name="search" placeholder="Search Users">
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+        </form>
+
+
+        <ul class="nav navbar-nav navbar-left">
+            <li ><a th:href="@{/home}">Home</a></li>
+            <li role="presentation" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/users}">Find Users</a></li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{'/users/'+${#authentication.name}}">
+                My Profile</a> </li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a> </li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+<div class="row">
+    <div th:if="${param.deleted}">
+        <div class="alert alert-info">
+            Deletion successful.
+        </div>
+    </div>
+    <div class="row">
+    <div th:each="user : ${users}" class="col-sm-2 col-md-2 text-center">
+        <div class="thumbnail text-center">
+            <div class="media" th:if="${user.profilePictureId}">
+                <div class=" media-middle">
+
+                    <div class="col-md-3 text-center" style="padding-left: 0px;  padding-right: 0px;">
+
+
+                        <img  width="160" height="160"
+                              class="media-object" th:src="@{/users/{username}/profile-picture (username = ${user.username})}" alt="...">
+                    </div>
+                </div>
+            </div>
+            <div class="media-middle" th:unless="${user.profilePictureId}">
+                <div class=" media-middle">
+
+                    <img width="160" height="160" class="media-object" th:src="@{/img/default-profile-picture.png}">
+
+                </div>
+            </div>
+            <div class="caption">
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" ></iframe>
+                </div>
+                <h3> <span th:text="${user.username}"></span></h3>
+                <p><a th:href="@{/users/{username}(username = ${user.username})}" class="btn btn-primary" role="button">
+                     View Profile
+                    </a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+<!--&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+
+    <footer>
+        <nav class="navbar navbar-default navbar-fixed-bottom" aria-label="...">
+            <ul class="pager">
+                <li th:if="${page} > 1">
+                    <a th:href="@{/users(page=${page - 2}, search=${search})}">
+                        Previous
+                    </a>
+                </li>
+                <li th:if="${allPagesNumber} > ${page}">
+                    <a th:href="@{/users(page=${page}, search = ${search})}">Next</a></li>
+            </ul>
+        </nav>
+    </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
+      xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>...</title>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-default fixed-top navbar">
+
+        <form class="navbar-form navbar-left" th:action="@{/home}" method="get" >
+            <div class="form-group">
+                <input type="text" class="form-control" name="search" placeholder="Search Lessons">
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+        </form>
+
+        <ul class="nav navbar-nav navbar-left">
+            <li ><a th:href="@{/home}">Home</a></li>
+            <li role="presentation" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/users}">Find Users</a></li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{'/users/'+${#authentication.name}}">
+                My Profile</a> </li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a> </li>
+        </ul>
+    </nav>
+</header>
+<div class="container">
+    <div class="row text-center">
+        <h1 th:text="${lesson.title}">Title</h1></div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="embed-responsive embed-responsive-16by9" >
+                <video width="320" height="240" controls th:if="${lesson.videoId}">
+                    <source th:src="@{/home/{lessonId}/view-video (lessonId = ${lesson.id})}" type="video/mp4">
+                </video>
+
+                <img width="960" height="540" th:src="@{/img/no-video.png}" th:unless="${lesson.videoId}">
+                <br>
+            </div>
+            <div>
+                <div class="row text-center">
+                    <br>
+
+                    <div class="col-md-3 col-md-offset-0" th:unless="${lesson.videoId}"
+                         th:if="${#authorization.expression('hasRole(''ADMIN'')')
+                         or lesson.authorUsername == username}">
+                <form enctype="multipart/form-data"
+                      action="#" th:action="@{'/home/{lessonId}/upload-video' (lessonId = ${lesson.id})}"
+                      th:method="post">
+                    <p> <input type="submit" value="Upload Video" class="btn btn-lg btn-primary" /> </p>
+
+                    <input type="file" id="file" name="file" multiple="multiple" />
+                </form>
+                    </div>
+
+                    <div class="col-md-3"
+                         th:if="${#authorization.expression('hasRole(''ADMIN'')')
+                         or lesson.authorUsername == username}">
+                    <form enctype="multipart/form-data"
+                          action="#" th:action="@{'/home/{lessonId}/upload-resource' (lessonId = ${lesson.id})}"
+                          th:method="post">
+                        <p> <input type="submit" value="Upload File" class="btn btn-lg btn-primary" /> </p>
+                        <input type="file" id="newFile" name="resource" multiple="multiple" />
+                    </form>
+                    </div>
+
+                    <div class="col-md-3"
+                         th:if="${#authorization.expression('hasRole(''ADMIN'')')
+                         or lesson.authorUsername == username}">
+                            <a class="btn btn-lg btn-danger" th:href="@{/home/{lessonId}/delete (lessonId = ${lesson.id})}">
+                                Delete Lesson
+                            </a>
+                    </div>
+
+                    <div class="col-md-3"
+                         th:if="${lesson.videoId} and ${#authorization.expression('hasRole(''ADMIN'')')
+                         or lesson.authorUsername == username}">
+                            <a class="btn btn-lg btn-danger" th:href="@{/home/{lessonId}/remove-video (lessonId = ${lesson.id})}">
+                                Remove Video</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!--        <div class="col col-md-2 col-md-offset-0">-->
+<!--            <h5 class="text-center">Resources:</h5>-->
+<!--            <div class="card" style="width: 18rem;">-->
+<!--                <ul class="list-group list-group-flush">-->
+<!--                    <li class="list-group-item" th:each="resource : ${lesson.resources}"><a-->
+<!--                            th:href="@{/home/{lessonId}/resources/{resourceId}-->
+<!--                            (lessonId = ${lesson.id}, resourceId = ${resource.id})}" target="_blank">-->
+<!--                        <span th:text="${resource.resourceName}">Resource Name</span></a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--    <div class="row">-->
+<!--        <br>-->
+<!--        <h2 class="text-center">Reviews:</h2>-->
+<!--        <div class="col-md-3 col-md-offset-2 border-bottom" th:each="lesson : ${lessons}">-->
+<!--            <div class="media">-->
+<!--                <div class="media-body">-->
+<!--                    <a class="media-heading" th:text="${reviewer.username}"-->
+<!--                       th:href="@{/users/{username} (username = ${comment.creator.username})}">Username</a>-->
+<!--                    <p th:text="${comment.comment}">Comment</p>-->
+<!--                    <p th:text="${review.date}">Rating</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <br>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    </div>
+<br>
+<br>
+        <br>
+        <div class="row bootstrap snippets bootdeys">
+            <div class="col-md-8 col-sm-12 col-md-offset-2">
+                <div class="comment-wrapper">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            Comments:
+                        </div>
+
+                        <div class="panel-body">
+                            <form action="#" th:action="@{/home/{lessonId}/add-review(lessonId = ${lesson.id})}"
+                                  th:object="${reviewRequest}" th:method="post">
+                                <textarea class="form-control" id="comment" placeholder="Write a comment..." rows="3"
+                                          th:field="*{comment}"></textarea>
+                                <br>
+                                <button type="submit" class="btn btn-info pull-right">Post</button>
+                            </form>
+                            <div class="clearfix"></div>
+                            <hr>
+                            <ul class="media-list">
+                                <li class="media" th:each="review : ${reviews}">
+                                        <img width="50" height="50" th:if="${review.creatorProfilePictureId}"
+                                             th:src="@{/users/{username}/profile-picture (username =
+                                              ${review.reviewCreatorUsername})}" alt="" class="img-circle">
+
+                                                <img  width="50" height="50" class="media-object"
+                                                      th:unless="${review.creatorProfilePictureId}"
+                                                     th:src="@{/img/default-profile-picture.png}">
+                                    <div class="media-body">
+                                <span class="text-muted pull-right">
+                                    <small class="text-muted"><span th:text="${review.date}">Date</span></small>
+                                </span>
+                                        <strong class="text-success">
+                                            <a th:if="${#authorization.expression('hasRole(''ADMIN'')') && review.reviewCreatorUsername != 'Deleted User'}"
+                                               th:href="@{/users/{username}(username = ${review.reviewCreatorUsername})}">
+                                                <span th:text="${review.reviewCreatorUsername}">Username</span>
+                                            </a>
+                                                <span th:unless="${#authorization.expression('hasRole(''ADMIN'')') && review.reviewCreatorUsername != 'Deleted User'}"
+                                                      th:text="${review.reviewCreatorUsername}">Username</span>
+
+                                        </strong>
+                                        <p>
+                                        <span th:text="${review.comment}">Comment</span>
+                                        </p>
+                                        <span>
+                                        <a th:if="${review.reviewCreatorUsername == username or #authorization.expression('hasRole(''ADMIN'')')}"
+                                           th:href="@{/home/{lessonId}/delete-review(lessonId = ${lesson.id},
+                                            reviewId = ${review.id})}"
+                                           class="btn btn-danger pull-right btn-sm">Remove</a>
+                                            </span>
+                                    </div>
+                                </li>
+                            </ul>
+                                <ul class="pager">
+                                    <li th:if="${reviewPage} > 1">
+                                        <a th:href="@{/home/{lessonId}(reviewPage=${reviewPage - 2}, lessonId = ${lesson.id})}">
+                                            Previous
+                                        </a>
+                                    </li>
+                                    <li th:if="${allPagesNumber} > ${reviewPage}">
+                                        <a th:href="@{/home/{lessonId}(reviewPage=${reviewPage}, lessonId = ${lesson.id})}">
+                                            Next
+                                        </a></li>
+                                </ul>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+</div>
+
+</body>
+</html>
+
+
+<!--<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">-->
+<!--    Dropdown <span class="caret"></span>-->
+<!--</a>-->

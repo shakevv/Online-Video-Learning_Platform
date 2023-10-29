@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-default fixed-top navbar">
+
+        <form class="navbar-form navbar-left" th:action="@{/home}" method="get" >
+            <div class="form-group">
+                <input type="text" class="form-control" name="search" placeholder="Search Lessons">
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+        </form>
+
+        <ul class="nav navbar-nav navbar-left">
+            <li ><a th:href="@{/home}">Home</a></li>
+            <li role="presentation" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/users}">Find Users</a></li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{'/users/' + ${#authentication.name}}">
+                My Profile</a> </li>
+            <li role="presentation" sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a> </li>
+        </ul>
+    </nav>
+</header>
+<div class="container">
+    <div th:if="${param.deleted}">
+        <div class="alert alert-info">
+            Lesson deleted.
+        </div>
+    </div>
+    <div class="page-header text-center">
+        <h1>View Lessons</h1>
+    </div>
+
+    <div id="create lesson button">
+        <button sec:authorize="hasAnyRole('ROLE_MODERATOR', 'ROLE_ADMIN')"
+            id="btnStart" type="button" class="btn btn-primary btn-success" data-toggle="modal" data-target="#formModal">
+            Create Lesson
+        </button>
+
+        <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="formModalLabel">Lesson Details</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="#" th:action="@{/home}"
+                          th:object="${lessonRequest}" th:method="post">
+                        <div class="modal-body">
+                            <div class="form-group row">
+                                <label for="title" class="col-sm-6 col-form-label">
+                                    Title:
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="title" placeholder="Title" th:field="*{title}">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="description" class="col-sm-6 col-form-label">
+                                    Description:
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="description" placeholder="Description"
+                                           th:field="*{description}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-4 border-bottom" th:each="lesson : ${lessons}">
+            <div class="media">
+                <div class="media-left media-middle">
+                        <div class=" media-middle">
+                            <img width="100" height="100" class="media-object" th:src="@{/img/lesson.png}">
+                        </div>
+                </div>
+                <div class="media-body">
+                    <h2 class="media-heading" th:text="${lesson.title}">Title</h2>
+                    <p th:text="${lesson.description}">Description</p>
+                    <p><a th:href="@{/home/{lessonId} (lessonId = ${lesson.id})}" class="btn btn-primary" role="button">View Lesson</a></p>
+
+                </div>
+            </div>
+            <br>
+        </div>
+        <footer>
+            <nav class="navbar navbar-default navbar-fixed-bottom" aria-label="...">
+                <ul class="pager">
+                    <li th:if="${page} > 1">
+                        <a th:href="@{/home(page=${page - 2}, search=${search})}">
+                            Previous
+                        </a>
+                    </li>
+                    <li th:if="${allPagesNumber} > ${page}">
+                        <a th:href="@{/home(page=${page}, search=${search})}">Next</a></li>
+                </ul>
+            </nav>
+        </footer>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
