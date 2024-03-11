@@ -10,6 +10,7 @@ import com.georgi.shakev.OnlineVideoLearningPlatform.repository.ResourceReposito
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.UserRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.service.LessonService;
 import com.georgi.shakev.OnlineVideoLearningPlatform.service.ResourceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,8 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class LessonServiceImpl implements LessonService {
@@ -41,66 +44,81 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
-    public LessonResponseDto createLesson(LessonRequestDto lessonDto, String username) throws IOException {
+    public LessonResponseDto createLesson(@NotNull LessonRequestDto lessonDto, @NotNull String username) throws IOException {
         Lesson lesson = dtoToEntity(lessonDto);
         lesson.setAuthor(userRepository.getByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found.")));
-        return entityToDto(lessonRepository.save(lesson));
+
+        LessonResponseDto newLesson = entityToDto(lessonRepository.save(lesson));
+        log.info("Lesson {} created.", newLesson);
+        return newLesson;
     }
 
     @Override
-    public LessonResponseDto getLesson(Long lessonId) {
+    public LessonResponseDto getLesson(@NotNull Long lessonId, String accessedByUsername) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found."));
+        log.info("Lesson with id {} accessed by {}", lessonId, accessedByUsername);
         return entityToDto(lesson);
     }
 
     @Override
     @Transactional
-    public void deleteLesson(Long lessonId) {
+    public void deleteLesson(@NotNull Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion."));
+
         lessonRepository.delete(lesson);
+        log.info("Lesson with id {} deleted", lessonId);
     }
 
     @Override
-    public Page<LessonResponseDto> getAllLessons(Integer pageNo, Integer pageSize, String sortBy, String searchFor) {
+    public Page<LessonResponseDto> getAllLessons(int pageNo, int pageSize, String sortBy, String searchFor) {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         return lessonRepository.getAllByTitleContainingIgnoreCase(searchFor, paging).map(this::entityToDto);
     }
 
     @Override
     @Transactional
-    public void uploadVideo(Long lessonId, MultipartFile video) throws IOException {
+    public void uploadVideo(@NotNull Long lessonId, MultipartFile video) throws IOException {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion"));
+
         resourceService.uploadVideo(lesson, video);
+        log.info("Video added to lesson with id {}", lessonId);
     }
 
     @Override
-    public ResponseEntity<?> viewVideo(Long lessonId) {
+    public ResponseEntity<?> viewVideo(@NotNull Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion"));
+
+        log.info("Video of lesson with id {} accessed", lessonId);
         return resourceService.getResource(lesson.getVideo().getId());
     }
 
     @Override
     @Transactional
-    public void removeVideo(Long lessonId) {
+    public void removeVideo(@NotNull Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion"));
-        if(lesson.getVideo() == null)
+
+        if(lesson.getVideo() == null) {
             throw new ResourceNotFoundException("Video not found.");
+        }
+
         Resource video = lesson.getVideo();
         lesson.setVideo(null);
         resourceRepository.delete(video);
         entityToDto(lessonRepository.save(lesson));
+        log.info("Video removed from lesson with id {}", lessonId);
     }
 
     private LessonResponseDto entityToDto(Lesson lesson){
         LessonResponseDto dto = new LessonResponseDto();
         dto.setId(lesson.getId());
-        dto.setAuthorUsername(lesson.getAuthor().getUsername());
+        String authorUsername = lesson.getAuthor() != null ? lesson.getAuthor().getUsername() : null;
+        dto.setAuthorUsername(authorUsername);
         dto.setTitle(lesson.getTitle());
         dto.setDescription(lesson.getDescription());
         if(lesson.getVideo() != null) {
@@ -109,7 +127,7 @@ public class LessonServiceImpl implements LessonService {
         return dto;
     }
 
-    private Lesson dtoToEntity(LessonRequestDto dto) throws IOException {
+    private Lesson dtoToEntity(LessonRequestDto dto) {
         Lesson lesson = new Lesson();
         lesson.setTitle(dto.getTitle());
         lesson.setDescription(dto.getDescription());

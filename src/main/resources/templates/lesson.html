@@ -3,20 +3,13 @@
       xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>...</title>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <title>View Lesson</title>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-
-    <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
 </head>
 <body>
 <header>
@@ -95,35 +88,6 @@
                 </div>
             </div>
         </div>
-
-<!--        <div class="col col-md-2 col-md-offset-0">-->
-<!--            <h5 class="text-center">Resources:</h5>-->
-<!--            <div class="card" style="width: 18rem;">-->
-<!--                <ul class="list-group list-group-flush">-->
-<!--                    <li class="list-group-item" th:each="resource : ${lesson.resources}"><a-->
-<!--                            th:href="@{/home/{lessonId}/resources/{resourceId}-->
-<!--                            (lessonId = ${lesson.id}, resourceId = ${resource.id})}" target="_blank">-->
-<!--                        <span th:text="${resource.resourceName}">Resource Name</span></a></li>-->
-<!--                </ul>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--    <div class="row">-->
-<!--        <br>-->
-<!--        <h2 class="text-center">Reviews:</h2>-->
-<!--        <div class="col-md-3 col-md-offset-2 border-bottom" th:each="lesson : ${lessons}">-->
-<!--            <div class="media">-->
-<!--                <div class="media-body">-->
-<!--                    <a class="media-heading" th:text="${reviewer.username}"-->
-<!--                       th:href="@{/users/{username} (username = ${comment.creator.username})}">Username</a>-->
-<!--                    <p th:text="${comment.comment}">Comment</p>-->
-<!--                    <p th:text="${review.date}">Rating</p>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <br>-->
-<!--        </div>-->
-<!--    </div>-->
-
     </div>
 <br>
 <br>
@@ -204,8 +168,3 @@
 
 </body>
 </html>
-
-
-<!--<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">-->
-<!--    Dropdown <span class="caret"></span>-->
-<!--</a>-->

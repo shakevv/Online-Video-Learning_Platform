@@ -16,8 +16,8 @@ public interface UserService extends UserDetailsService {
     UserResponseDto makeAdmin(String username);
     UserResponseDto removeModerator(String username);
     UserResponseDto removeAdmin(String username);
-    UserResponseDto getUser(String username);
-    Page<UserResponseDto> getAllUsers(Integer pageNo, Integer pageSize, String sortBy, String keyword);
+    UserResponseDto getUser(String username, String accessedByUsername);
+    Page<UserResponseDto> getAllUsers(int pageNo, int pageSize, String sortBy, String keyword, String accessedByUsername);
     void deleteUser(String username);
     void uploadProfilePicture(String username, MultipartFile picture) throws IOException;
     ResponseEntity<?> viewProfilePicture(String username);

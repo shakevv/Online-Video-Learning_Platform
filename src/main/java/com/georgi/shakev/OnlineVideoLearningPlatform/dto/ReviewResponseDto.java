@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReviewResponseDto {
     long id;
-    @Size(max = 2048)
     private String comment;
     private String reviewCreatorUsername;
     private Long creatorProfilePictureId;

@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ResourceService {
-
     void uploadProfilePicture(User user, MultipartFile video) throws IOException;
     void uploadVideo(Lesson lesson, MultipartFile video) throws IOException;
     ResponseEntity<?> getResource(Long resourceId);

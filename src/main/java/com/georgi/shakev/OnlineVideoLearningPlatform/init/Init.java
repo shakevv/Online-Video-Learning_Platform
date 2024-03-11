@@ -9,17 +9,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Init implements CommandLineRunner {
+    private static final String DEFAULT_ADMIN_USERNAME = "admin";
+    private static final String DEFAULT_ADMIN_PASSWORD = "admin";
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Override
     public void run(String... args) {
-        if(userRepository.getByUsername("admin").isEmpty()) {
+        if(userRepository.getByUsername(DEFAULT_ADMIN_USERNAME).isEmpty()) {
             User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("Adminpass1!"));
-            admin.getRoles().add("ROLE_ADMIN");
+            admin.setUsername(DEFAULT_ADMIN_USERNAME);
+            admin.setPassword(passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD));
+            admin.getRoles().add(ROLE_ADMIN);
             userRepository.save(admin);
         }
     }

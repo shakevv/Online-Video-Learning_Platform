@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @Configuration
 public class SpringContentConfig {
-
     public Converter<UUID, String> converter() {
         return new FilesystemStoreConverter<UUID, String>() {
             @Override

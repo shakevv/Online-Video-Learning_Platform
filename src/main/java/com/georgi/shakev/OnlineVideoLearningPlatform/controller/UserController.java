@@ -6,6 +6,7 @@ import com.georgi.shakev.OnlineVideoLearningPlatform.exception.ResourceNotFoundE
 import com.georgi.shakev.OnlineVideoLearningPlatform.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +32,6 @@ import java.io.IOException;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    private User principal;
     private final AuthenticationManager authenticationManager;
 
     @Autowired
@@ -42,14 +42,13 @@ public class UserController {
 
     @GetMapping("/{username}")
     @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
-    public String getUser(Model model, @PathVariable("username") String username){
-        UserResponseDto userResponse = userService.getUser(username);
+    public String getUser(Model model, @PathVariable("username") String username, @AuthenticationPrincipal User principal){
+        UserResponseDto userResponse = userService.getUser(username, principal.getUsername());
         model.addAttribute("user", userResponse);
+
         UserRequestDto userRequest = new UserRequestDto(null, null);
         model.addAttribute("userRequest", userRequest);
-        principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         model.addAttribute("username", principal.getUsername());
-        log.info("User profile {} opened by {}", userResponse, principal.getUsername());
         return "user";
     }
 
@@ -57,23 +56,24 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public String searchUsers(Model model,
                               HttpServletRequest request,
-            @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "9") Integer pageSize,
-            @RequestParam(defaultValue = "username") String sortBy,
+                              @RequestParam(defaultValue = "0") Integer pageNo,
+                              @RequestParam(defaultValue = "9") Integer pageSize,
+                              @RequestParam(defaultValue = "username") String sortBy,
                               @RequestParam(value = "search", defaultValue = "") String username,
                               @AuthenticationPrincipal User principal) {
         if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
             pageNo = Integer.parseInt(request.getParameter("page"));
         }
-        int allPages = userService.getAllUsers(pageNo, pageSize, sortBy, username).getTotalPages();
+        Page<UserResponseDto> allUsersResponse = userService.getAllUsers(pageNo, pageSize, sortBy, username, principal.getUsername());
+        int allPages = allUsersResponse.getTotalPages();
         if(pageNo < 0 || pageNo > allPages){
             throw new ResourceNotFoundException("Invalid page number.");
         }
-        model.addAttribute("users", userService.getAllUsers(pageNo, pageSize, sortBy, username));
+
+        model.addAttribute("users", allUsersResponse);
         model.addAttribute("page", pageNo + 1);
         model.addAttribute("search", username);
         model.addAttribute("allPagesNumber", allPages);
-        log.info("User search for {}, page number {} accessed by {}", username, pageNo, principal.getUsername());
         return "users";
     }
 
@@ -88,131 +88,27 @@ public class UserController {
 
     @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
     @PostMapping("/{username}/updated")
-    public String update (HttpServletRequest req, Model model, @PathVariable("username") String username,
+    public String update(HttpServletRequest req, Model model, @PathVariable("username") String username,
                           UserRequestDto user, BindingResult binding,
-                          RedirectAttributes redirectAttr) {
+                          RedirectAttributes redirectAttr,
+                         @AuthenticationPrincipal User principal) {
         if(binding.hasErrors()) {
             redirectAttr.addFlashAttribute("user", user);
             redirectAttr.addFlashAttribute("org.springframework.validation.BindingResult.project", binding);
             return "redirect:/users/" + username + "?error";
         }
-//        principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserResponseDto updatedUser;
 
+        UserResponseDto updatedUser;
         if(username.equals(principal.getUsername())) {
             updatedUser = userService.updateUser(username, user);
             reLogin(req, user.getUsername(), user.getPassword());
-//            model.addAttribute("username", updatedUser.getUsername());
-//            log.info("User {} updated", updatedUser);
         }
         else{
             updatedUser = userService.updateUser(username, user);
-
         }
-
-//        model.addAttribute("username", updatedUser.getUsername());
-        log.info("User {} updated", principal.getUsername());
-
-        model.addAttribute("username", principal.getUsername());
-
-        return "redirect:/users/" + updatedUser.getUsername();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{username}/make-admin")
-    public String makeAdmin (HttpServletRequest req, Model model, @PathVariable("username") String username) {
-       // principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        UserResponseDto updatedUser;
-        updatedUser = userService.makeAdmin(username);
-
-//        if(username.equals(principal.getUsername())) {
-//            reLogin(req, updatedUser.getUsername(), principal.getPassword());
-//        }
 
         model.addAttribute("username", updatedUser.getUsername());
-        log.info("User {} has admin rights", username);
-        return "redirect:/users/" + username + "?success";
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{username}/remove-admin")
-    public String removeAdmin (HttpServletRequest req, Model model, @PathVariable("username") String username,
-                             UserRequestDto user) {
-        //principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        UserResponseDto updatedUser = userService.removeAdmin(username);
-//        if(username.equals(principal.getUsername())) {
-//
-//            reLogin(req, username, principal.getPassword());
-//        }
-//        else{
-//            UserResponseDto updatedUser = userService.removeAdmin(username);
-//        }
-
-        log.info("User {} does not have admin rights", username);
-
-        model.addAttribute("username", user.getUsername());
-
-        return "redirect:/users/" + username + "?success";
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{username}/make-moderator")
-    public String makeModerator (HttpServletRequest req, Model model, @PathVariable("username") String username,
-                             UserRequestDto user) {
-        //principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        UserResponseDto updatedUser = userService.makeModerator(username);
-//        if(username.equals(principal.getUsername())) {
-//
-//            reLogin(req, username, principal.getPassword());
-//        }
-//        else{
-//            UserResponseDto updatedUser = userService.makeModerator(username);
-//        }
-
-        model.addAttribute("username", user.getUsername());
-        log.info("User {} has moderator rights", username);
-        return "redirect:/users/" + username + "?success";
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{username}/remove-moderator")
-    public String removeModerator (HttpServletRequest req, Model model, @PathVariable("username") String username,
-                                 UserRequestDto user) {
-        principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        UserResponseDto updatedUser = userService.removeModerator(username);
-//        if(username.equals(principal.getUsername())) {
-//            UserResponseDto updatedUser = userService.removeModerator(username);
-//            reLogin(req, username, principal.getPassword());
-//        }
-//        else{
-//
-//        }
-
-        model.addAttribute("username", user.getUsername());
-        log.info("User {} does not have moderator rights", username);
-        return "redirect:/users/" + username + "?success";
-    }
-
-    @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
-    @GetMapping("/{username}/delete")
-    public String deleteUser(@PathVariable(value = "username") String username,
-                                 Model model, @AuthenticationPrincipal User principal) {
-        userService.deleteUser(username);
-        if(username.equals(principal.getUsername())){
-            SecurityContextHolder.getContext().setAuthentication(null);
-            log.info("User with username {} deleted", username);
-            return"login";
-        }
-        else {
-            principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            model.addAttribute("username", principal.getUsername());
-            log.info("User with username {} deleted", username);
-            return "redirect:/users?deleted";
-        }
+        return "redirect:/users/" + updatedUser.getUsername();
     }
 
     private void reLogin(HttpServletRequest request, String userName, String password) {
@@ -226,6 +122,54 @@ public class UserController {
         session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{username}/make-admin")
+    public String makeAdmin (Model model, @PathVariable("username") String username) {
+        UserResponseDto updatedUser = userService.makeAdmin(username);
+        model.addAttribute("username", updatedUser.getUsername());
+        return "redirect:/users/" + username + "?success";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{username}/remove-admin")
+    public String removeAdmin (Model model, @PathVariable("username") String username, UserRequestDto user) {
+        UserResponseDto updatedUser = userService.removeAdmin(username);
+        model.addAttribute("username", user.getUsername());
+        return "redirect:/users/" + username + "?success";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{username}/make-moderator")
+    public String makeModerator (Model model, @PathVariable("username") String username, UserRequestDto user) {
+        UserResponseDto updatedUser = userService.makeModerator(username);
+        model.addAttribute("username", user.getUsername());
+        return "redirect:/users/" + username + "?success";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{username}/remove-moderator")
+    public String removeModerator (Model model, @PathVariable("username") String username, UserRequestDto user) {
+        UserResponseDto updatedUser = userService.removeModerator(username);
+        model.addAttribute("username", user.getUsername());
+        return "redirect:/users/" + username + "?success";
+    }
+
+    @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
+    @GetMapping("/{username}/delete")
+    public String deleteUser(@PathVariable(value = "username") String username,
+                                 Model model, @AuthenticationPrincipal User principal) {
+        userService.deleteUser(username);
+        if(username.equals(principal.getUsername())){
+            SecurityContextHolder.getContext().setAuthentication(null);
+            return"login";
+        }
+        else {
+            principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            model.addAttribute("username", principal.getUsername());
+            return "redirect:/users?deleted";
+        }
+    }
+
     @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
     @GetMapping("/{username}/profile-picture")
     public ResponseEntity<?> getProfilePicture(@PathVariable String username){
@@ -234,20 +178,17 @@ public class UserController {
 
     @PreAuthorize("principal.username == #username")
     @PostMapping("/{username}/profile-picture/upload")
-    public String uploadProfilePicture(@PathVariable String username,
-                                    @RequestParam("file") MultipartFile file) throws IOException {
+    public String uploadProfilePicture(@PathVariable String username, @RequestParam("file") MultipartFile file) throws IOException {
         if(!file.isEmpty()) {
             userService.uploadProfilePicture(username, file);
         }
-        log.info("User with username {} profile picture displayed", username);
-         return "redirect:/users/" + username;
+        return "redirect:/users/" + username;
     }
 
     @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
     @GetMapping("/{username}/remove-profile-picture")
     public String removeProfilePicture(@PathVariable String username, Model model){
-         userService.removeProfilePicture(username);
-        log.info("User with username {} profile picture removed", username);
+        userService.removeProfilePicture(username);
         return "redirect:/users/" + username;
     }
 }

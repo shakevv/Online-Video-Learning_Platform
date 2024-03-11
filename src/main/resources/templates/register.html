@@ -50,7 +50,7 @@
                     </label>
                     <input id="password" class="form-control" type="password" th:field="*{password}"
                            required autofocus="autofocus"
-                           pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,256}$" minlength="8">
+                           pattern="^(?=.*[a-z])(?=.*).{5,256}$" minlength="5">
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-success">Register</button>
@@ -62,4 +62,4 @@
 </div>
 
 </body>
-</html>l>
+</html>

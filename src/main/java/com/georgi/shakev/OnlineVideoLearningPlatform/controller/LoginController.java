@@ -25,7 +25,6 @@ import javax.validation.Valid;
 @Controller
 @Slf4j
 public class LoginController {
-
     private final UserService userService;
     private final LessonService lessonService;
     private User principal;
@@ -47,8 +46,10 @@ public class LoginController {
     }
 
     @GetMapping("/home")
-    public String homePage(Model model, HttpServletRequest request,
-                           @RequestParam(value = "search", defaultValue = "") String search,
+    public String homePage(Model model,
+                           HttpServletRequest request,
+                           @RequestParam(value = "search", defaultValue = "")
+                           String search,
                            @AuthenticationPrincipal User principal) {
         String sortBy = "id";
         int page = 0;
@@ -60,6 +61,7 @@ public class LoginController {
         if (page < 0 || page > allPages) {
             throw new ResourceNotFoundException("Invalid page number.");
         }
+
         LessonRequestDto lessonRequest = new LessonRequestDto();
         model.addAttribute("username", principal.getUsername());
         model.addAttribute("lessonRequest", lessonRequest);
@@ -67,7 +69,6 @@ public class LoginController {
         model.addAttribute("lessons", lessonService.getAllLessons(page, size, sortBy, search).getContent());
         model.addAttribute("page", page + 1);
         model.addAttribute("allPagesNumber", allPages);
-        log.info("Home page accessed by {}", principal.getUsername());
         return "index";
     }
 
@@ -78,7 +79,6 @@ public class LoginController {
 
     @GetMapping("/register")
     public String showRegistrationForm() {
-        log.info("Register page accessed");
         return "register";
     }
 
@@ -92,8 +92,8 @@ public class LoginController {
             redirectAttr.addFlashAttribute("org.springframework.validation.BindingResult.project", binding);
             return "redirect:/register?error";
         }
+
         UserResponseDto newUser = userService.createUser(registrationDto);
-        log.info("{} successfully registered", newUser);
         return "redirect:/register?success";
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/home/{lessonId}")
 @Slf4j
 public class ReviewController {
-
     private final ReviewService reviewService;
 
     @Autowired
@@ -29,22 +28,19 @@ public class ReviewController {
     }
 
     @PostMapping("/add-review")
-    public String createReview(ReviewRequestDto reviewRequestDto, @PathVariable Long lessonId,
-                               @AuthenticationPrincipal User principal) {
+    public String createReview(ReviewRequestDto reviewRequestDto, @PathVariable Long lessonId, @AuthenticationPrincipal User principal) {
         reviewRequestDto.setReviewCreatorUsername(principal.getUsername());
         reviewRequestDto.setLessonId(lessonId);
-        reviewService.createReview(reviewRequestDto);
-        log.info("Review {} added by user {}", reviewRequestDto.getComment(), principal.getUsername());
+        reviewService.createReview(reviewRequestDto, principal.getUsername());
         return "redirect:/home/" + reviewRequestDto.getLessonId();
     }
 
     @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
     @GetMapping("/delete-review")
     public String deleteReview(@RequestParam(value = "reviewId", defaultValue = "0") Long reviewId,
-                               @PathVariable Long lessonId, Model model,
+                               @PathVariable Long lessonId,
                                @AuthenticationPrincipal User principal) {
-        reviewService.deleteReview(reviewId);
-        log.info("Review with id {} deleted by user {}", reviewId, principal.getUsername());
+        reviewService.deleteReview(reviewId, principal.getUsername());
         return "redirect:/home/" + lessonId;
     }
 }

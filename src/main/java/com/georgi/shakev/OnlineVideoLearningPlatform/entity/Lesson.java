@@ -46,6 +46,7 @@ public class Lesson {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Column(name = "created_at")
     private LocalDateTime created = LocalDateTime.now();
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Column(name = "last_updated_at")
     private LocalDateTime lastUpdated = LocalDateTime.now();

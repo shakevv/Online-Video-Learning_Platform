@@ -9,6 +9,7 @@ import com.georgi.shakev.OnlineVideoLearningPlatform.repository.LessonRepository
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.ReviewRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.UserRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.service.ReviewService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
+
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
@@ -38,24 +42,26 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional
-    public void createReview(ReviewRequestDto reviewRequest) {
+    public void createReview(@NotNull ReviewRequestDto reviewRequest, String createdByUsername) {
        reviewRepository.save(dtoToEntity(reviewRequest));
+       log.info("Review {} added by user {}", reviewRequest.getComment(), createdByUsername);
     }
 
     @Override
     @Transactional
-    public void deleteReview(Long reviewId) {
+    public void deleteReview(@NotNull Long reviewId, String deletedByUsername) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found."));
+
         reviewRepository.delete(review);
-        reviewRepository.findAll(PageRequest.of(defaultPageNumber, pageSize, Sort.by(sortBy).descending()))
-                .map(this::entityToDto);
+        log.info("Review with id {} deleted by user {}", reviewId, deletedByUsername);
     }
 
     @Override
-    public Page<ReviewResponseDto> getReviews(int page, Long lessonId) {
+    public Page<ReviewResponseDto> getReviews(int page, @NotNull Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found."));
+
         return reviewRepository.getAllByLessonId(
                 lessonId, PageRequest.of(page, pageSize, Sort.by(sortBy).descending()))
                 .map(this::entityToDto);
