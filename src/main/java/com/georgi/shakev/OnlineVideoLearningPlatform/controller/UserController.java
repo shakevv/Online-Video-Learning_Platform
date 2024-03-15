@@ -19,7 +19,11 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -89,22 +93,18 @@ public class UserController {
     @PreAuthorize("principal.username == #username or hasRole('ADMIN')")
     @PostMapping("/{username}/updated")
     public String update(HttpServletRequest req, Model model, @PathVariable("username") String username,
-                          UserRequestDto user, BindingResult binding,
+                          UserRequestDto userRequest, BindingResult binding,
                           RedirectAttributes redirectAttr,
                          @AuthenticationPrincipal User principal) {
         if(binding.hasErrors()) {
-            redirectAttr.addFlashAttribute("user", user);
+            redirectAttr.addFlashAttribute("user", userRequest);
             redirectAttr.addFlashAttribute("org.springframework.validation.BindingResult.project", binding);
             return "redirect:/users/" + username + "?error";
         }
 
-        UserResponseDto updatedUser;
+        UserResponseDto updatedUser = userService.updateUser(username, userRequest);
         if(username.equals(principal.getUsername())) {
-            updatedUser = userService.updateUser(username, user);
-            reLogin(req, user.getUsername(), user.getPassword());
-        }
-        else{
-            updatedUser = userService.updateUser(username, user);
+            reLogin(req, userRequest.getUsername(), userRequest.getPassword());
         }
 
         model.addAttribute("username", updatedUser.getUsername());
