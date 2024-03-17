@@ -12,10 +12,17 @@ public class Init implements CommandLineRunner {
     private static final String DEFAULT_ADMIN_USERNAME = "admin";
     private static final String DEFAULT_ADMIN_PASSWORD = "admin";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
+
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public Init(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
     public void run(String... args) {
         if(userRepository.getByUsername(DEFAULT_ADMIN_USERNAME).isEmpty()) {

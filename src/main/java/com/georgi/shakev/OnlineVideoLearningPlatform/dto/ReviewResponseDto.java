@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewResponseDto {
-    long id;
+    private Long id;
     private String comment;
     private String reviewCreatorUsername;
     private Long creatorProfilePictureId;

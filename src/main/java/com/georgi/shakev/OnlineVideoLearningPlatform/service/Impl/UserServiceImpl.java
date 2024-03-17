@@ -39,11 +39,11 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private final LessonRepository lessonRepository;
-
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_MODERATOR = "ROLE_MODERATOR";
     private static final String PASSWORD_REQUIREMENTS = "^(?=.*[a-z])(?=.*).{5,256}$";
+
+    private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private final ResourceService resourceService;

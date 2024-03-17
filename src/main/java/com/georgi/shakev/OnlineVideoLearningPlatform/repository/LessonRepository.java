@@ -10,6 +10,5 @@ import java.util.List;
 
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
     Page<Lesson> getAllByTitleContainingIgnoreCase(String title, Pageable pageable);
-
     List<Lesson> findAllByAuthor(User user);
 }

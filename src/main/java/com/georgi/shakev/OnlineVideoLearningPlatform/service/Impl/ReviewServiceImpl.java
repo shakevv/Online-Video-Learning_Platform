@@ -23,7 +23,6 @@ import javax.validation.constraints.NotNull;
 @Service
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
-
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;

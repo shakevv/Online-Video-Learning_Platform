@@ -15,10 +15,14 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    private UserService userService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {

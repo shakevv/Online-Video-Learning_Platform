@@ -24,7 +24,6 @@ import java.io.IOException;
 @Service
 @Transactional(readOnly = true)
 public class ResourceServiceImpl implements ResourceService {
-
     private final ResourceStore resourceStore;
     private final ResourceRepository resourceRepository;
     private final LessonRepository lessonRepository;

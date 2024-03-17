@@ -27,7 +27,6 @@ import javax.validation.Valid;
 public class LoginController {
     private final UserService userService;
     private final LessonService lessonService;
-    private User principal;
 
     @Autowired
     public LoginController(UserService userService, LessonService lessonService) {
