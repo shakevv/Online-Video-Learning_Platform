@@ -13,7 +13,6 @@ public class Init implements CommandLineRunner {
     private static final String DEFAULT_ADMIN_PASSWORD = "admin";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -25,7 +24,7 @@ public class Init implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if(userRepository.getByUsername(DEFAULT_ADMIN_USERNAME).isEmpty()) {
+        if (userRepository.getByUsername(DEFAULT_ADMIN_USERNAME).isEmpty()) {
             User admin = new User();
             admin.setUsername(DEFAULT_ADMIN_USERNAME);
             admin.setPassword(passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD));

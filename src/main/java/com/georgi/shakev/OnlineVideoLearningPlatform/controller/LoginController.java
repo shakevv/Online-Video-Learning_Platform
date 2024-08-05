@@ -53,6 +53,7 @@ public class LoginController {
         String sortBy = "id";
         int page = 0;
         int size = 3;
+
         if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
             page = Integer.parseInt(request.getParameter("page"));
         }
@@ -65,7 +66,8 @@ public class LoginController {
         model.addAttribute("username", principal.getUsername());
         model.addAttribute("lessonRequest", lessonRequest);
         model.addAttribute("search", search);
-        model.addAttribute("lessons", lessonService.getAllLessons(page, size, sortBy, search).getContent());
+        model.addAttribute("lessons",
+                lessonService.getAllLessons(page, size, sortBy, search).getContent());
         model.addAttribute("page", page + 1);
         model.addAttribute("allPagesNumber", allPages);
         return "index";

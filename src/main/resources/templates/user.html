@@ -48,7 +48,9 @@
 
 
                     <img  width="200" height="200"
-                          class="media-object" th:src="@{/users/{username}/profile-picture (username = ${user.username})}" alt="...">
+                          class="media-object"
+                          th:src="@{/users/{username}/profile-picture (username = ${user.username})}"
+                          alt="...">
                     </div>
             </div>
             <br>
@@ -68,7 +70,7 @@
                 </div>
 
         <button id="btnStart" type="button" class="btn btn-primary btn-success" data-toggle="modal" data-target="#formModal"
-                th:if="${user.username == username} or ${#authorization.expression('hasRole(''ADMIN'')')}">
+                th:if="${user.username == username}">
             Update</button>
 
         <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">

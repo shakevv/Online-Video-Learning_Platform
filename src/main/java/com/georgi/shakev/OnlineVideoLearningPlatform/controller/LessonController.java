@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 @Controller
 @Slf4j
@@ -43,19 +42,22 @@ public class LessonController {
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping("/home")
-    public String postLesson(LessonRequestDto lessonRequestDto, @AuthenticationPrincipal User principal) throws IOException {
+    public String postLesson(LessonRequestDto lessonRequestDto, @AuthenticationPrincipal User principal) {
         LessonResponseDto response = lessonService.createLesson(lessonRequestDto, principal.getUsername());
         return "redirect:/home/" + response.getId();
     }
 
     @GetMapping("/home/{lessonId}")
-    public String getLesson(Model model, @PathVariable Long lessonId, HttpServletRequest request, @AuthenticationPrincipal User principal){
+    public String getLesson(Model model,
+                            @PathVariable Long lessonId,
+                            HttpServletRequest request,
+                            @AuthenticationPrincipal User principal) {
         int reviewPage = 0;
         if (request.getParameter("reviewPage") != null && !request.getParameter("reviewPage").isEmpty()) {
             reviewPage = Integer.parseInt(request.getParameter("reviewPage"));
         }
         int allPages = reviewService.getReviews(reviewPage, lessonId).getTotalPages();
-        if(reviewPage < 0 || reviewPage > allPages){
+        if (reviewPage < 0 || reviewPage > allPages) {
             throw new ResourceNotFoundException("Invalid page number.");
         }
 
@@ -76,20 +78,20 @@ public class LessonController {
     }
 
     @GetMapping("/home/{lessonId}/view-video")
-    public ResponseEntity<?> getVideo(@PathVariable Long lessonId){
+    public ResponseEntity<?> getVideo(@PathVariable Long lessonId) {
         return lessonService.viewVideo(lessonId);
     }
 
     @PostMapping("/home/{lessonId}/upload-video")
-    public String uploadVideo(@PathVariable Long lessonId, @RequestParam("file") MultipartFile file) throws IOException {
-        if(!file.isEmpty()) {
+    public String uploadVideo(@PathVariable Long lessonId, @RequestParam("file") MultipartFile file) {
+        if (!file.isEmpty()) {
             lessonService.uploadVideo(lessonId, file);
         }
         return "redirect:/home/" + lessonId;
     }
 
     @GetMapping("/home/{lessonId}/remove-video")
-    public String removeVideo(@PathVariable Long lessonId){
+    public String removeVideo(@PathVariable Long lessonId) {
         lessonService.removeVideo(lessonId);
         return "redirect:/home/" + lessonId;
     }

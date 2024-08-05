@@ -12,7 +12,10 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserResponseDto {
     private Long id;
+
     private String username;
+
     private Long profilePictureId;
+
     private Set<String> roles = new HashSet<>();
 }

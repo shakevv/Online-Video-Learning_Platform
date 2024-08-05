@@ -60,7 +60,7 @@ public class Lesson {
 
     @PostUpdate
     public void lessonPostUpdate() {
-       this.lastUpdated = LocalDateTime.now();
+        this.lastUpdated = LocalDateTime.now();
     }
 
     @Override

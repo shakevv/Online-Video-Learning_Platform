@@ -32,7 +32,9 @@ public class ReviewController {
     }
 
     @PostMapping("/add-review")
-    public String createReview(ReviewRequestDto reviewRequestDto, @PathVariable Long lessonId, @AuthenticationPrincipal User principal) {
+    public String createReview(ReviewRequestDto reviewRequestDto,
+                               @PathVariable Long lessonId,
+                               @AuthenticationPrincipal User principal) {
         reviewRequestDto.setReviewCreatorUsername(principal.getUsername());
         reviewRequestDto.setLessonId(lessonId);
         reviewService.createReview(reviewRequestDto, principal.getUsername());

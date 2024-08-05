@@ -1,10 +1,10 @@
 package com.georgi.shakev.OnlineVideoLearningPlatform.service.Impl;
 
-import com.georgi.shakev.OnlineVideoLearningPlatform.dto.ResourceResponseDto;
 import com.georgi.shakev.OnlineVideoLearningPlatform.entity.Lesson;
 import com.georgi.shakev.OnlineVideoLearningPlatform.entity.Resource;
 import com.georgi.shakev.OnlineVideoLearningPlatform.entity.User;
 import com.georgi.shakev.OnlineVideoLearningPlatform.exception.ResourceNotFoundException;
+import com.georgi.shakev.OnlineVideoLearningPlatform.exception.UploadResourceException;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.LessonRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.ResourceRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.UserRepository;
@@ -42,41 +42,40 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     @Transactional
-    public void uploadProfilePicture(User user, MultipartFile file) throws IOException {
-        Resource r = new Resource();
-        r.setMimeType(file.getContentType());
-        resourceStore.setContent(r, file.getInputStream());
-        user.setProfilePicture(resourceRepository.save(r));
-        userRepository.save(user);
-        new ResponseEntity<>(HttpStatus.OK);
+    public void uploadProfilePicture(User user, MultipartFile file) {
+        try {
+            Resource r = new Resource();
+            r.setMimeType(file.getContentType());
+            resourceStore.setContent(r, file.getInputStream());
+            user.setProfilePicture(resourceRepository.save(r));
+            userRepository.save(user);
+        } catch (IOException e) {
+            throw new UploadResourceException(e.getMessage());
+        }
     }
 
     @Override
     @Transactional
-    public void uploadVideo(Lesson lesson, MultipartFile file) throws IOException {
-        Resource r = new Resource();
-        r.setMimeType(file.getContentType());
-        resourceStore.setContent(r, file.getInputStream());
-        lesson.setVideo(resourceRepository.save(r));
-        lessonRepository.save(lesson);
-        new ResponseEntity<>(HttpStatus.OK);
+    public void uploadVideo(Lesson lesson, MultipartFile file) {
+        try {
+            Resource r = new Resource();
+            r.setMimeType(file.getContentType());
+            resourceStore.setContent(r, file.getInputStream());
+            lesson.setVideo(resourceRepository.save(r));
+            lessonRepository.save(lesson);
+        } catch (IOException e) {
+            throw new UploadResourceException(e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<?> getResource(Long resourceId) {
         Resource r = resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found."));
-            InputStreamResource inputStreamResource = new InputStreamResource(resourceStore.getContent(r));
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentLength(r.getContentLength());
-            headers.set("Content-Type", r.getMimeType());
-            return new ResponseEntity<>(inputStreamResource, headers, HttpStatus.OK);
-    }
-
-    private ResourceResponseDto entityToDto(Resource resource){
-        ResourceResponseDto dto = new ResourceResponseDto();
-        dto.setId(resource.getId());
-        dto.setName(resource.getName());
-        return dto;
+        InputStreamResource inputStreamResource = new InputStreamResource(resourceStore.getContent(r));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentLength(r.getContentLength());
+        headers.set("Content-Type", r.getMimeType());
+        return new ResponseEntity<>(inputStreamResource, headers, HttpStatus.OK);
     }
 }

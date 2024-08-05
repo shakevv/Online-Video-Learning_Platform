@@ -10,5 +10,6 @@ import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> getAllByLessonId(Long lessonId, Pageable pageable);
+
     List<Review> findAllByCreator(User user);
 }

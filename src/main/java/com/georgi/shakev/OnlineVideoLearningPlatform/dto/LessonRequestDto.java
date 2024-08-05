@@ -16,6 +16,7 @@ public class LessonRequestDto {
     @NotNull
     @Size(min = 2, max = 100)
     private String title;
+
     @NonNull
     @Size(max = 2048)
     private String description;

@@ -5,10 +5,10 @@ import com.georgi.shakev.OnlineVideoLearningPlatform.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 public interface ResourceService {
-    void uploadProfilePicture(User user, MultipartFile video) throws IOException;
-    void uploadVideo(Lesson lesson, MultipartFile video) throws IOException;
+    void uploadProfilePicture(User user, MultipartFile video);
+
+    void uploadVideo(Lesson lesson, MultipartFile video);
+
     ResponseEntity<?> getResource(Long resourceId);
 }

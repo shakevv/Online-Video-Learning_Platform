@@ -5,6 +5,7 @@ import com.georgi.shakev.OnlineVideoLearningPlatform.dto.LessonResponseDto;
 import com.georgi.shakev.OnlineVideoLearningPlatform.entity.Lesson;
 import com.georgi.shakev.OnlineVideoLearningPlatform.entity.Resource;
 import com.georgi.shakev.OnlineVideoLearningPlatform.exception.ResourceNotFoundException;
+import com.georgi.shakev.OnlineVideoLearningPlatform.exception.UploadResourceException;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.LessonRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.ResourceRepository;
 import com.georgi.shakev.OnlineVideoLearningPlatform.repository.UserRepository;
@@ -34,7 +35,10 @@ public class LessonServiceImpl implements LessonService {
     private final ResourceRepository resourceRepository;
 
     @Autowired
-    public LessonServiceImpl(LessonRepository lessonRepository, UserRepository userRepository, ResourceService resourceService, ResourceRepository resourceRepository) {
+    public LessonServiceImpl(LessonRepository lessonRepository,
+                             UserRepository userRepository,
+                             ResourceService resourceService,
+                             ResourceRepository resourceRepository) {
         this.lessonRepository = lessonRepository;
         this.userRepository = userRepository;
         this.resourceService = resourceService;
@@ -43,7 +47,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
-    public LessonResponseDto createLesson(@NotNull LessonRequestDto lessonDto, @NotNull String username) throws IOException {
+    public LessonResponseDto createLesson(@NotNull LessonRequestDto lessonDto, @NotNull String username) {
         Lesson lesson = dtoToEntity(lessonDto);
         lesson.setAuthor(userRepository.getByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found.")));
@@ -79,12 +83,16 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
-    public void uploadVideo(@NotNull Long lessonId, MultipartFile video) throws IOException {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion"));
-
-        resourceService.uploadVideo(lesson, video);
-        log.info("Video added to lesson with id {}", lessonId);
+    public void uploadVideo(@NotNull Long lessonId, MultipartFile video) {
+        try {
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion"));
+            resourceService.uploadVideo(lesson, video);
+            log.info("Video added to lesson with id {}", lessonId);
+        } catch (IOException e) {
+            log.error("Video cannot be added to lesson with id {}", lessonId);
+            throw new UploadResourceException(e.getMessage());
+        }
     }
 
     @Override
@@ -102,7 +110,7 @@ public class LessonServiceImpl implements LessonService {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found for deletion"));
 
-        if(lesson.getVideo() == null) {
+        if (lesson.getVideo() == null) {
             throw new ResourceNotFoundException("Video not found.");
         }
 
@@ -113,14 +121,14 @@ public class LessonServiceImpl implements LessonService {
         log.info("Video removed from lesson with id {}", lessonId);
     }
 
-    private LessonResponseDto entityToDto(Lesson lesson){
+    private LessonResponseDto entityToDto(Lesson lesson) {
         LessonResponseDto dto = new LessonResponseDto();
         dto.setId(lesson.getId());
         String authorUsername = lesson.getAuthor() != null ? lesson.getAuthor().getUsername() : null;
         dto.setAuthorUsername(authorUsername);
         dto.setTitle(lesson.getTitle());
         dto.setDescription(lesson.getDescription());
-        if(lesson.getVideo() != null) {
+        if (lesson.getVideo() != null) {
             dto.setVideoId(lesson.getVideo().getId());
         }
         return dto;

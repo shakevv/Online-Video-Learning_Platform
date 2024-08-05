@@ -9,8 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LessonResponseDto {
     private Long id;
+
     private String title;
+
     private String description;
+
     private String authorUsername;
+
     private Long videoId;
 }

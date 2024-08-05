@@ -12,6 +12,8 @@ import javax.validation.constraints.Size;
 public class ReviewRequestDto {
     @Size(max = 2048)
     private String comment;
+
     private String reviewCreatorUsername;
+
     private Long lessonId;
 }

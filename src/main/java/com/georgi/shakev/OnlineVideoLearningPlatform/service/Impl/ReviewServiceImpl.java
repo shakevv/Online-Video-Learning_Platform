@@ -23,12 +23,12 @@ import javax.validation.constraints.NotNull;
 @Service
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
+    private static final String sortBy = "id";
+    private static final int pageSize = 10;
+
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;
-    private final String sortBy = "id";
-    private final int pageSize = 10;
-    private final int defaultPageNumber = 0;
 
     @Autowired
     public ReviewServiceImpl(ReviewRepository reviewRepository,
@@ -42,8 +42,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public void createReview(@NotNull ReviewRequestDto reviewRequest, String createdByUsername) {
-       reviewRepository.save(dtoToEntity(reviewRequest));
-       log.info("Review {} added by user {}", reviewRequest.getComment(), createdByUsername);
+        reviewRepository.save(dtoToEntity(reviewRequest));
+        log.info("Review {} added by user {}", reviewRequest.getComment(), createdByUsername);
     }
 
     @Override
@@ -62,11 +62,11 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found."));
 
         return reviewRepository.getAllByLessonId(
-                lessonId, PageRequest.of(page, pageSize, Sort.by(sortBy).descending()))
+                        lessonId, PageRequest.of(page, pageSize, Sort.by(sortBy).descending()))
                 .map(this::entityToDto);
     }
 
-    private ReviewResponseDto entityToDto(Review review){
+    private ReviewResponseDto entityToDto(Review review) {
         ReviewResponseDto dto = new ReviewResponseDto();
         String creatorName = review.getCreator() != null ?
                 review.getCreator().getUsername() : "Deleted User";
@@ -74,19 +74,19 @@ public class ReviewServiceImpl implements ReviewService {
         dto.setComment(review.getComment());
         dto.setDate(review.getCreated());
         dto.setId(review.getId());
-        if(review.getCreator() != null && review.getCreator().getProfilePicture() != null) {
+        if (review.getCreator() != null && review.getCreator().getProfilePicture() != null) {
             dto.setCreatorProfilePictureId(review.getCreator().getProfilePicture().getId());
         }
         return dto;
     }
 
-    private Review dtoToEntity(ReviewRequestDto dto){
+    private Review dtoToEntity(ReviewRequestDto dto) {
         Review review = new Review();
         review.setComment(dto.getComment());
         review.setCreator(userRepository.getByUsername(dto.getReviewCreatorUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found.")));
         review.setLesson(lessonRepository.getById(dto.getLessonId()));
-        if(review.getLesson() == null){
+        if (review.getLesson() == null) {
             throw new ResourceNotFoundException("Lesson not found.");
         }
         return review;

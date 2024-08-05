@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,11 +44,10 @@ public class UserServiceImpl implements UserService {
 
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
     private final ResourceService resourceService;
     private final ResourceRepository resourceRepository;
-
     private final ReviewRepository reviewRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, ResourceService resourceService,
@@ -82,7 +80,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDto createUser(@NotNull UserRequestDto newUser) {
         Optional<User> user = userRepository.getByUsername(newUser.getUsername());
-        if(user.isPresent()){
+        if (user.isPresent()) {
             throw new UserAlreadyExistsException("User with this username already exists.");
         }
 
@@ -106,14 +104,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private User doUpdateUser(String username, UserRequestDto userRequest, User user) {
-        if(userRequest.getUsername() != null && userRepository.getByUsername(userRequest.getUsername()).isEmpty()
-                && username.length() >= 2){
+        if (userRequest.getUsername() != null
+                && userRepository.getByUsername(userRequest.getUsername()).isEmpty()
+                && username.length() >= 2) {
             user.setUsername(userRequest.getUsername());
         }
 
-        if(userRequest.getPassword() != null && userRequest.getPassword().matches(PASSWORD_REQUIREMENTS)){
-            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        }
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
         return userRepository.save(user);
     }
@@ -185,8 +182,10 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponseDto> getAllUsers(int pageNo, int pageSize, String sortBy, String keyword, String accessedByUsername) {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<User> pagedResult = userRepository.getAllByUsernameContainingIgnoreCase(keyword, paging);
+
         Page<UserResponseDto> allUsersResponse = pagedResult.map(this::entityToDto);
         log.info("User search for {}, page number {} accessed by {}", keyword, pageNo, accessedByUsername);
+
         return allUsersResponse;
     }
 
@@ -198,6 +197,7 @@ public class UserServiceImpl implements UserService {
 
         removeUserFromHisReviews(user);
         removeUserFromHisLessons(user);
+
         userRepository.delete(user);
         log.info("User with username {} deleted", username);
     }
@@ -216,13 +216,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void uploadProfilePicture(String username, MultipartFile picture) throws IOException {
-       User user = userRepository.getByUsername(username)
-               .orElseThrow(() -> new ResourceNotFoundException("User with username not found: " + username));
+    public void uploadProfilePicture(String username, MultipartFile picture) {
+        User user = userRepository.getByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User with username not found: " + username));
 
-       resourceService.uploadProfilePicture(user, picture);
-       userRepository.save(user);
-       log.info("User with username {} profile picture uploaded", username);
+        resourceService.uploadProfilePicture(user, picture);
+        userRepository.save(user);
+        log.info("User with username {} profile picture uploaded", username);
     }
 
     @Override
@@ -241,25 +241,30 @@ public class UserServiceImpl implements UserService {
 
         Resource picture = user.getProfilePicture();
         user.setProfilePicture(null);
+
         resourceRepository.delete(picture);
         userRepository.save(user);
+
         log.info("User with username {} profile picture removed", username);
     }
 
-    private User dtoToEntity(UserRequestDto dto){
+    private User dtoToEntity(UserRequestDto dto) {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setPassword(dto.getPassword());
+
         return user;
     }
 
-    private UserResponseDto entityToDto(User user){
+    private UserResponseDto entityToDto(User user) {
         UserResponseDto dto = new UserResponseDto();
         dto.setUsername(user.getUsername());
         dto.setId(user.getId());
-        if(user.getProfilePicture() != null) {
+
+        if (user.getProfilePicture() != null) {
             dto.setProfilePictureId(user.getProfilePicture().getId());
         }
+
         user.getRoles().forEach((r) -> dto.getRoles().add(r));
         return dto;
     }

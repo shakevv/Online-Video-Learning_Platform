@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResourceResponseDto {
     private Long id;
+
     private String name;
 }

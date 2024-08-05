@@ -13,7 +13,8 @@ import javax.validation.constraints.Size;
 public class UserRequestDto {
     @Size(min = 2, message = "Username length should be at least 2.")
     private String username;
+
     @Pattern(regexp = "^(?=.*[a-z])(?=.*).{5,256}$",
-            message = "Password should be at least 8 characters long.")
+            message = "Password should be at least 5 characters long.")
     private String password;
 }

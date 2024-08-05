@@ -51,24 +51,13 @@
                     <div class="col-md-3 col-md-offset-0" th:unless="${lesson.videoId}"
                          th:if="${#authorization.expression('hasRole(''ADMIN'')')
                          or lesson.authorUsername == username}">
-                <form enctype="multipart/form-data"
-                      action="#" th:action="@{'/home/{lessonId}/upload-video' (lessonId = ${lesson.id})}"
-                      th:method="post">
-                    <p> <input type="submit" value="Upload Video" class="btn btn-lg btn-primary" /> </p>
+                        <form enctype="multipart/form-data"
+                              action="#" th:action="@{'/home/{lessonId}/upload-video' (lessonId = ${lesson.id})}"
+                              th:method="post">
+                            <p> <input type="submit" value="Upload Video" class="btn btn-lg btn-primary" /> </p>
 
-                    <input type="file" id="file" name="file" multiple="multiple" />
-                </form>
-                    </div>
-
-                    <div class="col-md-3"
-                         th:if="${#authorization.expression('hasRole(''ADMIN'')')
-                         or lesson.authorUsername == username}">
-                    <form enctype="multipart/form-data"
-                          action="#" th:action="@{'/home/{lessonId}/upload-resource' (lessonId = ${lesson.id})}"
-                          th:method="post">
-                        <p> <input type="submit" value="Upload File" class="btn btn-lg btn-primary" /> </p>
-                        <input type="file" id="newFile" name="resource" multiple="multiple" />
-                    </form>
+                            <input type="file" id="file" name="file" multiple="multiple" />
+                        </form>
                     </div>
 
                     <div class="col-md-3"

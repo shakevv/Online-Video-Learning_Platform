@@ -9,12 +9,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SpringBootApplication
 public class OnlineVideoLearningPlatformApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(OnlineVideoLearningPlatformApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(OnlineVideoLearningPlatformApplication.class, args);
+    }
 
-	@Bean
-	public PasswordEncoder passwordEncoder(){
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

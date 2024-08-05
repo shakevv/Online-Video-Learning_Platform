@@ -25,7 +25,7 @@ public class SpringContentConfig {
     }
 
     @Bean
-    public FilesystemStoreConfigurer configurer(){
+    public FilesystemStoreConfigurer configurer() {
         return new FilesystemStoreConfigurer() {
             @Override
             public void configureFilesystemStoreConverters(ConverterRegistry registry) {
@@ -36,7 +36,7 @@ public class SpringContentConfig {
 
     @Bean
     File filesystemRoot() {
-        try{
+        try {
             return Files.createTempDirectory("").toFile();
         } catch (IOException e) {
             return null;
@@ -44,7 +44,7 @@ public class SpringContentConfig {
     }
 
     @Bean
-    FileSystemResourceLoader fileSystemResourceLoader(){
+    FileSystemResourceLoader fileSystemResourceLoader() {
         return new FileSystemResourceLoader(filesystemRoot().getAbsolutePath());
     }
 }
